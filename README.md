@@ -1,58 +1,86 @@
-# quarkus-getting-started project
+# Item sold store inventory aggregator component
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+The goal of this  Kafka streams implementation is to build a real time store inventory view from items sold in different stores. 
+The aggregates are kept in state store and exposed via interactive queries.
 
-If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
+The project is used as a Kafka Streams lab [documented here](https://ibm-cloud-architecture.github.io/refarch-eda/use-cases/kafka-streams/lab-3/) with instructions to deploy and run it on OpenShift.
 
-## Running the application in dev mode
+Here is a simple diagram to illustrate the components used:
 
-You can run your application in dev mode that enables live coding using:
-```shell script
-./mvnw compile quarkus:dev
+ ![1](https://github.com/ibm-cloud-architecture/refarch-eda/blob/master/docs/src/pages/use-cases/kafka-streams/lab-3/images/inventory-components.png)
+
+The goal of this note is to present how to run this store inventory aggregator locally using Strimzi Kafka image and instructions to build it.
+
+Updated 06/09/2021
+
+## Pre-requisites
+
+For development purpose the following pre-requisites need to be installed on your working computer:
+
+**Java**
+- For the purposes of this lab we suggest Java 11+
+- Quarkus (on version 1.13.x)
+
+**Git client**
+
+**Maven**
+- Maven will be needed for bootstrapping our application from the command-line and running
+our application.
+
+**Docker**
+
+If you want to access the end solution clone the following git repository: `git clone https://github.com/ibm-cloud-architecture/refarch-eda-store-inventory`.
+
+## In a hurry, just run it locally
+
+* Start local Kafka: `docker-compose  up -d` to start one Kafka broker, and two item-inventory service instances. 
+* Created the `items` and `store.inventory` topics on your Kafka instance
+ 
+ ```shell
+ ./scripts/createTopics.sh 
+######################
+ create Topics
+Created topic items.
+Created topic store.inventory.
+
+./scripts/listTopics.sh 
+######################
+ List Topics
+store.inventory
+items
+ ```
+
+* Verify each components runs well with `docker ps`:
+
+```sh
+CONTAINER ID   IMAGE                                      PORTS                     NAMES
+f31e4364dec9   quay.io/ibmcase/eda-store-simulator        0.0.0.0:8082->8080/tcp    storesimulator
+2c2959bbda15   obsidiandynamics/kafdrop                   0.0.0.0:9000->9000/tcp    kafdrop
+3e569f205f6f   quay.io/strimzi/kafka:latest-kafka-2.7.0   0.0.0.0:29092->9092/tcp   kafka
+0cf09684b675   quay.io/strimzi/kafka:latest-kafka-2.7.0   0.0.0.0:2181->2181/tcp    zookeeper
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
+* Start the app in dev mode: `./mvnw quarkus:dev`
 
-## Packaging and running the application
+Then [see the demonstration](#demonstration-script) script section below to test the application.
 
-The application can be packaged using:
-```shell script
-./mvnw package
-```
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+## Demonstration script
 
-If you want to build an _über-jar_, execute the following command:
-```shell script
-./mvnw package -Dquarkus.package.type=uber-jar
-```
+Once started go to one of the Store Aggregator API: [swagger-ui/](http://localhost:8080/q/swagger-ui/) and select
+the `​/api​/v1​/stores​/inventory​/{storeID}` end point. Using the `Store_1` as storeID you should get an empty response.
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+* Send some item sale simulated records with `curl` on the simulator APIs: `curl -X POST http://localhost:8082/start -d '20'` or using the user interface at [http://localhost:8082/](http://localhost:8082/)
 
-## Creating a native executable
+  ![](./docs/store_simulator.png)
 
-You can create a native executable using: 
-```shell script
-./mvnw package -Pnative
-```
+* Use [Kafdrop UI](http://localhost:9000/) to see messages in `items` topic.
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using: 
-```shell script
-./mvnw package -Pnative -Dquarkus.native.container-build=true
-```
+  ![](./docs/kafdrop_items.png)
 
-You can then execute your native executable with: `./target/quarkus-getting-started-1.0.0-runner`
+* Verify the store inventory is updated: `curl -X GET "http://localhost:8080/api/v1/stores/inventory/Store_2" -H  "accept: application/json"`
+* Verify messages are sent to `store.inventory` topic by 
 
-If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.html.
+  ![](./docs/kafdrop_store_inventory.png)
 
-## Related guides
-
-- RESTEasy JAX-RS ([guide](https://quarkus.io/guides/rest-json)): REST endpoint framework implementing JAX-RS and more
-
-## Provided examples
-
-### RESTEasy JAX-RS example
-
-REST is easy peasy with this Hello World RESTEasy resource.
-
-[Related guide section...](https://quarkus.io/guides/getting-started#the-jax-rs-resources)
+**Remark: after the store aggregator consumes some items, you should see some new topics created, used to persist the 
+the stores aggregates.**
