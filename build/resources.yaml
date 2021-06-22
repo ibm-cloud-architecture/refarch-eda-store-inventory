@@ -1,0 +1,42 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: store-inventory-source
+spec:
+  type: git
+  params:
+    - name: url
+      value: https://github.com/jbcodeforce/refarch-eda-store-inventory
+    - name: revision
+      value: main
+---
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: store-aggregator-image-native
+spec:
+  type: image
+  params:
+    - name: url
+      value: quay.io/ibmcase/store-aggregator:native
+---
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: store-aggregator-image-jvm
+spec:
+  type: image
+  params:
+    - name: url
+      value: quay.io/ibmcase/store-aggregator
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: m2-cache
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi

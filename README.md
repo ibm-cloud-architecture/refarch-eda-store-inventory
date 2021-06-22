@@ -84,3 +84,16 @@ the `​/api​/v1​/stores​/inventory​/{storeID}` end point. Using the `St
 
 **Remark: after the store aggregator consumes some items, you should see some new topics created, used to persist the 
 the stores aggregates.**
+
+
+## Tekton pipeline
+
+Ensure the OCP cluster has a pipeline operator, and pipeline for building quarkus app is defined.
+
+```sh
+# Verify pipeline 
+oc get pipelines -n rt-inventory-pipe
+# Define resources
+oc apply -f build/resources.yaml
+oc create -f build/pipelinerun.yaml
+```
