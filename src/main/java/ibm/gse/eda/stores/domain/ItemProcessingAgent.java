@@ -20,15 +20,14 @@ import ibm.gse.eda.stores.infra.ItemStream;
 import ibm.gse.eda.stores.infra.StoreInventoryStream;
 
 /**
- * The agent processes item from the items stream and build an inventory aggregate
- * per store. It accumulates sale quantity per item 
- * and stock amount per store per item
+ * The agent processes item sold events from the items topic using Kafka streams
+ * topology. 
+ * The goal is to compute the store inventory, which mean the number of items per item id per store
  */
 @ApplicationScoped
 public class ItemProcessingAgent {
-    // store to keep stock per store-id
+    // Kafka store construct to keep item stock per store-id
     public static String STORE_INVENTORY_KAFKA_STORE_NAME = "StoreInventoryStock";
-    public String storeInventoryOutputStreamName= "store.inventory";
     // input streams
     public ItemStream inItemsAsStream;
     // two output streams
@@ -36,12 +35,7 @@ public class ItemProcessingAgent {
    
     public ItemProcessingAgent() {
         this.inItemsAsStream = new ItemStream();
-        storeInventoryAsStream = new StoreInventoryStream();
-   
-        Optional<String> v =ConfigProvider.getConfig().getOptionalValue("app.store.inventory.topic", String.class);
-        if (v.isPresent()) {
-            this.storeInventoryOutputStreamName = v.get();
-        }
+        this.storeInventoryAsStream = new StoreInventoryStream();
     }
 
     /**
@@ -75,7 +69,7 @@ public class ItemProcessingAgent {
     public void produceStoreInventoryToInventoryOutputStream(KTable<String, StoreInventory> storeInventory) {
         KStream<String, StoreInventory> inventories = storeInventory.toStream();
         inventories.print(Printed.toSysOut());
-        inventories.to(storeInventoryOutputStreamName, Produced.with(Serdes.String(), StoreInventory.storeInventorySerde));
+        inventories.to(storeInventoryAsStream.storeInventoryOutputStreamName, Produced.with(Serdes.String(), StoreInventory.storeInventorySerde));
     }
 
 }

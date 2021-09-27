@@ -48,7 +48,7 @@ public class TestItemStreamTopology {
 
     /**
      * From items streams which includes sell or restock events from a store
-     * aggregage per store and keep item, quamntity
+     * aggregate per store and keep item, quamntity
      */
     @BeforeEach
     public void setup() {

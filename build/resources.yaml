@@ -6,7 +6,7 @@ spec:
   type: git
   params:
     - name: url
-      value: https://github.com/jbcodeforce/refarch-eda-store-inventory
+      value: https://github.com/ibm-cloud-architecture/refarch-eda-store-inventory
     - name: revision
       value: main
 ---

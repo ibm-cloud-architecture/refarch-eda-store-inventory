@@ -14,12 +14,12 @@ import io.quarkus.runtime.StartupEvent;
 
 @OpenAPIDefinition(
     tags = {
-            @Tag(name="eda", description="IBM Event Driven Architecture labs"),
+            @Tag(name="eda", description="IBM Event Driven Architecture"),
             @Tag(name="labs", description="Inventory end to end solution")
     },
     info = @Info(
-        title="Store aggregators API",
-        version = "1.0.0",
+        title="Store item inventory aggregators API",
+        version = "0.0.5",
         contact = @Contact(
             name = "IBM Garage Solution Engineering",
             url = "http://https://ibm-cloud-architecture.github.io/refarch-eda/"),
