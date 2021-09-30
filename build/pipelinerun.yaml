@@ -18,5 +18,10 @@ spec:
     value: main
   - name: DOCKERFILE
     value: src/main/docker/Dockerfile.jvm
-  - name: IMAGE_NAME
-    value: image-registry.openshift-image-registry.svc:5000/rt-inventory-cicd/store-aggregator
+  - name: image-server
+    value: image-registry.openshift-image-registry.svc.cluster.local:5000
+  - name: image-namespace
+    value: rt-inventory-cicd
+  - name: image-repository
+    value: store-aggregator
+    

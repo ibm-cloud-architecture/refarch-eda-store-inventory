@@ -1,0 +1,19 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  generateName: run-build-
+spec:
+  serviceAccountName: pipeline
+  taskRef:
+    kind: Task
+    name: build-app
+  resources:
+    inputs:
+      - name: source
+        resourceRef:
+          name: git-source
+    outputs:
+      - name: builtImage
+        resourceRef:
+          name: store-aggregator-image-jvm
+      

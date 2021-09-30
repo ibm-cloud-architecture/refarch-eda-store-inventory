@@ -178,13 +178,24 @@ the stores aggregates.**
 
 ## Tekton pipeline
 
-Ensure the OCP cluster has a pipeline operator, and pipeline for building quarkus app is defined.
+See the rt-inventory-gitops repository for configuring ArgoCD and Tekton and the solution deployment
+definitions.
+
+Se we need to have the pipeline operator up and running, and the pipeline for building quarkus app is defined.
 
 ```sh
 # Verify pipeline 
-oc get pipelines -n rt-inventory-pipe
+oc get pipelines -n rt-inventory-cicd
+# Verify you have the needed secrets to get access to github
+oc get secrets
+# need to see at least
+git-host-access-token                                         Opaque                                1      4m8s
+git-host-basic-auth-token                                     kubernetes.io/basic-auth              2      4m6s
+gitops-webhook-secret                                         Opaque                                1      4m4s
+regcred                                                       kubernetes.io/dockerconfigjson        1      12m
+webhook-secret-rt-inventory-dev-refarch-eda-store-simulator 
 # Define resources
-oc apply -f build/resources.yaml
+# oc apply -f build/resources.yaml
 # Run the pipeline
 oc create -f build/pipelinerun.yaml
 

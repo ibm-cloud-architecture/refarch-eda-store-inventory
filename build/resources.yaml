@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1alpha1
 kind: PipelineResource
 metadata:
-  name: store-inventory-source
+  name: git-source
 spec:
   type: git
   params:
@@ -18,7 +18,7 @@ spec:
   type: image
   params:
     - name: url
-      value: quay.io/ibmcase/store-aggregator:native
+      value: image-registry.openshift-image-registry.svc:5000/rt-inventory/store-aggregator:native
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: PipelineResource
@@ -28,7 +28,7 @@ spec:
   type: image
   params:
     - name: url
-      value: quay.io/ibmcase/store-aggregator
+      value: image-registry.openshift-image-registry.svc:5000/rt-inventory/store-aggregator
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
