@@ -5,6 +5,7 @@ metadata:
 spec:
   pipelineRef:
     name: build-quarkus-app
+  serviceAccountName: pipeline
   workspaces:
   - name: build-ws
     persistentvolumeclaim:
