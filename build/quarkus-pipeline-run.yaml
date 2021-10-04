@@ -7,7 +7,7 @@ spec:
     name: build-quarkus-app
   serviceAccountName: pipeline
   workspaces:
-  - name: build-ws
+  - name: shared-workspace
     persistentvolumeclaim:
       claimName: m2-cache
   - name: maven-settings
@@ -24,5 +24,7 @@ spec:
   - name: image-namespace
     value: rt-inventory-cicd
   - name: image-repository
-    value: store-aggregator
+    value: eda-store-inventory
+  - name: image-tag
+    value: latest
     
