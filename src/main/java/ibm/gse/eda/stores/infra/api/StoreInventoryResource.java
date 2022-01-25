@@ -1,6 +1,9 @@
 package ibm.gse.eda.stores.infra.api;
 
+import java.util.logging.Logger;
+
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -10,9 +13,12 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
 import ibm.gse.eda.stores.infra.api.dto.InventoryQueryResult;
 import ibm.gse.eda.stores.infra.api.dto.ItemCountQueryResult;
 import ibm.gse.eda.stores.infra.api.dto.PipelineMetadata;
+import io.quarkus.runtime.StartupEvent;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 
@@ -20,11 +26,17 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 @Path("/api/v1/stores")
 public class StoreInventoryResource {
+    private static final Logger logger = Logger.getLogger(StoreInventoryResource.class.getName());
+
     private final Client client = ClientBuilder.newBuilder().build();
 
     @Inject
     public StoreInventoryQueries inventoryQueries;
 
+    @Inject
+    @ConfigProperty(name="app.version")
+    public String version;
+    
     @GET
     @Path("/inventory/{storeID}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -69,4 +81,13 @@ public class StoreInventoryResource {
                 .get(ItemCountQueryResult.class);
         return Uni.createFrom().item(rep);
     }
+
+    @GET
+    public String getVersion(){
+        return "{ \"version\": \"" + version + "\"}";
+    }
+
+    void onStart(@Observes StartupEvent ev){
+		logger.info(getVersion());
+	}
 }

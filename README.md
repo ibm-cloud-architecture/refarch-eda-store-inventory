@@ -7,7 +7,12 @@ The aggregates are kept in state store and exposed via interactive queries.
 The goal of this note is to present how to run this store inventory aggregator locally 
 using Strimzi Kafka image, and how to build it.
 
-Updated 09/26/2021: 
+Updated 01/25/2021
+
+* move to quarkus 2.6.3
+> quarkus dev   does not work.
+
+Updated 01/26/2021: 
 
 * move to kafka 2.8.1. 
 * Simplify readme and reference other content.

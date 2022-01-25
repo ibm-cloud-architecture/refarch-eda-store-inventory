@@ -2,8 +2,6 @@ package ibm.gse.eda.stores.infra;
 
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
@@ -11,7 +9,6 @@ import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.KStream;
 import org.eclipse.microprofile.config.ConfigProvider;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import ibm.gse.eda.stores.domain.ItemTransaction;
 

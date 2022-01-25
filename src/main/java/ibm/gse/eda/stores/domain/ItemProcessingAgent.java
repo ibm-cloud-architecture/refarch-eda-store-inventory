@@ -1,7 +1,5 @@
 package ibm.gse.eda.stores.domain;
 
-import java.util.Optional;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 
@@ -14,7 +12,6 @@ import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Printed;
 import org.apache.kafka.streams.kstream.Produced;
 import org.apache.kafka.streams.state.KeyValueStore;
-import org.eclipse.microprofile.config.ConfigProvider;
 
 import ibm.gse.eda.stores.infra.ItemStream;
 import ibm.gse.eda.stores.infra.StoreInventoryStream;
