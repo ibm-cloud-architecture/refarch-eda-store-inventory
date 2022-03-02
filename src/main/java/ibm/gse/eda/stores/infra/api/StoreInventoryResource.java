@@ -3,7 +3,6 @@ package ibm.gse.eda.stores.infra.api;
 import java.util.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -13,12 +12,9 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-
 import ibm.gse.eda.stores.infra.api.dto.InventoryQueryResult;
 import ibm.gse.eda.stores.infra.api.dto.ItemCountQueryResult;
 import ibm.gse.eda.stores.infra.api.dto.PipelineMetadata;
-import io.quarkus.runtime.StartupEvent;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 
@@ -32,10 +28,6 @@ public class StoreInventoryResource {
 
     @Inject
     public StoreInventoryQueries inventoryQueries;
-
-    @Inject
-    @ConfigProperty(name="app.version")
-    public String version;
     
     @GET
     @Path("/inventory/{storeID}")
@@ -64,8 +56,7 @@ public class StoreInventoryResource {
 
     private Uni<InventoryQueryResult> queryRemoteInventoryStore(final String host, final int port, String storeId) {
         String url = String.format("http://%s:%d//inventory/store/%s", host, port, storeId);
-        System.out.println("Data found on " + url);
-        // System.out.println(url);
+        logger.info("Data found on " + url);
         InventoryQueryResult rep = client.target(url)
                 .request(MediaType.APPLICATION_JSON)
                 .get(InventoryQueryResult.class);
@@ -74,20 +65,11 @@ public class StoreInventoryResource {
 
     private Uni<ItemCountQueryResult> queryRemoteItemCountStore(final String host, final int port, String itemID) {
         String url = String.format("http://%s:%d//inventory/item/%s", host, port, itemID);
-        System.out.println("Data found on " + url);
-        // System.out.println(url);
+        logger.info("Data found on " + url);
         ItemCountQueryResult rep = client.target(url)
                 .request(MediaType.APPLICATION_JSON)
                 .get(ItemCountQueryResult.class);
         return Uni.createFrom().item(rep);
     }
 
-    @GET
-    public String getVersion(){
-        return "{ \"version\": \"" + version + "\"}";
-    }
-
-    void onStart(@Observes StartupEvent ev){
-		logger.info(getVersion());
-	}
 }
