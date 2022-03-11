@@ -2,8 +2,11 @@ package ut;
 
 import java.util.Properties;
 
-import org.apache.kafka.common.serialization.Serde;
+import javax.inject.Inject;
+
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.TestInputTopic;
 import org.apache.kafka.streams.TestOutputTopic;
@@ -13,35 +16,44 @@ import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+
+import groovyjarjarantlr4.v4.parse.ANTLRParser.qid_return;
+
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import ibm.gse.eda.stores.domain.ItemProcessingAgent;
+import org.junit.jupiter.api.TestMethodOrder;
+
 import ibm.gse.eda.stores.domain.ItemTransaction;
 import ibm.gse.eda.stores.domain.StoreInventory;
-import ibm.gse.eda.stores.infra.ItemStream;
-import ibm.gse.eda.stores.infra.StoreInventoryStream;
-import io.quarkus.kafka.client.serialization.JsonbSerde;
+import ibm.gse.eda.stores.domain.StoreInventoryAggregator;
+import ibm.gse.eda.stores.infra.events.JSONSerde;
+import ibm.gse.eda.stores.infra.events.StoreSerdes;
+import io.quarkus.test.junit.QuarkusTest;
+
 
 /**
  * Use TestDriver to test the Kafka streams topology without kafka brokers
  */
+@QuarkusTest
+@TestMethodOrder(OrderAnnotation.class)
 public class TestItemStreamTopology {
      
-    private static TopologyTestDriver testDriver;
+    private  TopologyTestDriver testDriver;
 
-    private TestInputTopic<String, ItemTransaction> inputTopic;
-    private TestOutputTopic<String, StoreInventory> storeInventoryOutputTopic;
- 
-    private Serde<String> stringSerde = new Serdes.StringSerde();
-    private JsonbSerde<ItemTransaction> itemSerde = new JsonbSerde<>(ItemTransaction.class);
-    private JsonbSerde<StoreInventory> inventorySerde = new JsonbSerde<>(StoreInventory.class);
-  
-    private ItemProcessingAgent agent = new ItemProcessingAgent();
+    private  TestInputTopic<String, ItemTransaction> inputTopic;
+    private  TestOutputTopic<String, StoreInventory> storeInventoryOutputTopic; 
+
+    @Inject
+    private  StoreInventoryAggregator aggregator;
    
     
-    public  Properties getStreamsConfig() {
+    public  static Properties getStreamsConfig() {
         final Properties props = new Properties();
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, "stock-aggregator");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "dummmy:1234");
+        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG,  Serdes.String().getClass());
         return props;
     }
 
@@ -51,26 +63,19 @@ public class TestItemStreamTopology {
      * aggregate per store and keep item, quamntity
      */
     @BeforeEach
-    public void setup() {
-        // as no CDI is used set the topic names
-        agent.inItemsAsStream = new ItemStream();
-        agent.inItemsAsStream.itemSoldInputStreamName="itemSold";
-        // output will go to the inventory
-        agent.storeInventoryAsStream = new StoreInventoryStream();
-        agent.storeInventoryAsStream.storeInventoryOutputStreamName = "inventory";
-        
-        Topology topology = agent.processItemTransaction();
+    public void setup() { 
+        Topology topology = aggregator.buildProcessFlow();
         testDriver = new TopologyTestDriver(topology, getStreamsConfig());
-        inputTopic = testDriver.createInputTopic(agent.inItemsAsStream.itemSoldInputStreamName, 
-                                stringSerde.serializer(),
-                                itemSerde.serializer());
-        storeInventoryOutputTopic = testDriver.createOutputTopic(agent.storeInventoryAsStream.storeInventoryOutputStreamName, 
-                                stringSerde.deserializer(), 
-                                inventorySerde.deserializer());
+        inputTopic = testDriver.createInputTopic(aggregator.itemSoldInputStreamName, 
+                                new StringSerializer(),
+                                StoreSerdes.ItemTransactionSerde().serializer());
+        storeInventoryOutputTopic = testDriver.createOutputTopic(aggregator.storeInventoryOutputStreamName, 
+                                new StringDeserializer(), 
+                                StoreSerdes.StoreInventorySerde().deserializer());
     }
 
     @AfterEach
-    public void tearDown() {
+    public  void tearDown() {
         try {
             testDriver.close();
         } catch (final Exception e) {
@@ -79,6 +84,7 @@ public class TestItemStreamTopology {
     }
 
     @Test
+    @Order(1)  
     public void shouldGetAStoreInventoryWithTwoItems() {
         // given two items are stocked in the same store
         ItemTransaction item = new ItemTransaction("Store-1","Item-1",ItemTransaction.RESTOCK,5,33.2);
@@ -86,7 +92,7 @@ public class TestItemStreamTopology {
         item = new ItemTransaction("Store-1","Item-2",ItemTransaction.RESTOCK,10,33.2);
         inputTopic.pipeInput(item.storeName, item);
         // the inventory keeps the store stock per items
-        ReadOnlyKeyValueStore<String,StoreInventory> inventory = testDriver.getKeyValueStore(ItemProcessingAgent.STORE_INVENTORY_KAFKA_STORE_NAME);
+        ReadOnlyKeyValueStore<String,StoreInventory> inventory = testDriver.getKeyValueStore(StoreInventoryAggregator.STORE_INVENTORY_KAFKA_STORE_NAME);
         StoreInventory aStoreStock = (StoreInventory)inventory.get("Store-1");
         Assertions.assertEquals(5L,  aStoreStock.stock.get("Item-1"));
         Assertions.assertEquals(10L,  aStoreStock.stock.get("Item-2"));
@@ -95,6 +101,7 @@ public class TestItemStreamTopology {
 
 
     @Test
+    @Order(2)  
     public void shouldGetInventoryUpdatedQuantity(){
         //given an item is stocked in a store
         ItemTransaction item = new ItemTransaction("Store-1","Item-1",ItemTransaction.RESTOCK,5,33.2);
@@ -109,6 +116,7 @@ public class TestItemStreamTopology {
     }
     
     @Test
+    @Order(3)  
     public void shouldGetRestockQuantity(){
         // given an item is stocked in a store
         ItemTransaction item = new ItemTransaction("Store-1","Item-1",ItemTransaction.RESTOCK,5,20);
@@ -118,7 +126,7 @@ public class TestItemStreamTopology {
 
         Assertions.assertFalse(storeInventoryOutputTopic.isEmpty()); 
         // can validate at the <Key,Value> Store
-        ReadOnlyKeyValueStore<String,StoreInventory> storage = testDriver.getKeyValueStore(ItemProcessingAgent.STORE_INVENTORY_KAFKA_STORE_NAME);
+        ReadOnlyKeyValueStore<String,StoreInventory> storage = testDriver.getKeyValueStore(StoreInventoryAggregator.STORE_INVENTORY_KAFKA_STORE_NAME);
         StoreInventory i = (StoreInventory)storage.get("Store-1");
         // the store keeps the last inventory
         Assertions.assertEquals(7L,  i.stock.get("Item-1"));

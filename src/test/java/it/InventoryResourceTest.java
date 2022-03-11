@@ -12,10 +12,9 @@ public class InventoryResourceTest {
     @Test
     public void testInventoryStoreEndpoint() {
         given()
-          .when().get("/api/v1/stores/store_1")
+          .when().get("/api/v1/stores/inventory/store_1")
           .then()
-             .statusCode(200)
-             .body("storeName", is("store_1")).extract().response();
+             .statusCode(200);
     }
 
 }

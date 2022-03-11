@@ -2,12 +2,10 @@ package ibm.gse.eda.stores.domain;
 
 import java.time.LocalDateTime;
 
-import io.quarkus.kafka.client.serialization.JsonbSerde;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
 @RegisterForReflection
-public class ItemTransaction {
-        public static JsonbSerde<ItemTransaction> itemTransactionSerde = new JsonbSerde<>(ItemTransaction.class);
+public class ItemTransaction   {
         public static String RESTOCK = "RESTOCK";
         public static String SALE = "SALE";
         public Long id;

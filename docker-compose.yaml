@@ -1,21 +1,7 @@
 version: '3.7'
 services:
-  storesimulator:
-    hostname: storesimulator
-    container_name: storesimulator
-    image: quay.io/ibmcase/eda-store-simulator
-    ports:
-      - 8082:8080
-    environment: 
-        KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-        APP_TARGET_MESSAGING: Kafka
-        SECURE_PROTOCOL: PLAINTEXT
-        KAFKA_CERT_PWD: toto
-        USER_CERT_PWD: toto
-    depends_on:
-        - kafka
   zookeeper:
-    image: quay.io/strimzi/kafka:latest-kafka-2.8.1
+    image: cp.icr.io/cp/ibm-eventstreams-kafka:10.5.0
     container_name: zookeeper
     command: [
       "sh", "-c",
@@ -26,7 +12,7 @@ services:
     environment:
       LOG_DIR: /tmp/logs
   kafka:
-    image: quay.io/strimzi/kafka:latest-kafka-2.8.1
+    image: cp.icr.io/cp/ibm-eventstreams-kafka:10.5.0
     container_name: kafka
     command: [
       "sh", "-c",
@@ -34,7 +20,8 @@ services:
       --override advertised.listeners=$${KAFKA_ADVERTISED_LISTENERS} \
       --override listener.security.protocol.map=$${KAFKA_LISTENER_SECURITY_PROTOCOL_MAP} \
       --override inter.broker.listener.name=$${KAFKA_INTER_BROKER_LISTENER_NAME} \
-      --override zookeeper.connect=$${KAFKA_ZOOKEEPER_CONNECT}"
+      --override zookeeper.connect=$${KAFKA_ZOOKEEPER_CONNECT} \
+      --override offsets.topic.replication.factor=$${KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR}"
     ]
     depends_on:
       - zookeeper
@@ -49,6 +36,12 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  addTopics:
+    image:  cp.icr.io/cp/ibm-eventstreams-kafka:10.5.0
+    depends_on:
+      - kafka
+    entrypoint: [ "bash",  "-c", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create  --if-not-exists --replication-factor 1 --partitions 1 --topic items 
+            && /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create  --if-not-exists --replication-factor 1 --partitions 1 --topic store.inventory"]
   kafdrop:
     image: obsidiandynamics/kafdrop
     container_name: kafdrop
@@ -59,3 +52,16 @@ services:
       KAFKA_BROKERCONNECT: "kafka:29092"
     depends_on:
       - kafka
+  simulator:
+    image: quay.io/ibmcase/eda-store-simulator:0.0.10
+    container_name: simulator
+    depends_on:
+      - kafka
+    hostname: simulator
+    ports:
+      - "8081:8080"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      APP_TARGET_MESSAGING: Kafka
+      USER_CERT_PWD: ""
+      KAFKA_CERT_PWD: ""

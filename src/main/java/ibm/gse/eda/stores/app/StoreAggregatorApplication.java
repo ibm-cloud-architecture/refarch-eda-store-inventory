@@ -1,6 +1,7 @@
 package ibm.gse.eda.stores.app;
 
 import javax.enterprise.event.Observes;
+import javax.inject.Inject;
 import javax.ws.rs.core.Application;
 
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
@@ -9,6 +10,8 @@ import org.eclipse.microprofile.openapi.annotations.info.Info;
 import org.eclipse.microprofile.openapi.annotations.info.License;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
+import ibm.gse.eda.stores.infra.events.ItemProcessingAgent;
+import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;
 
 
@@ -28,8 +31,6 @@ import io.quarkus.runtime.StartupEvent;
             url = "http://www.apache.org/licenses/LICENSE-2.0.html"))
 )
 public class StoreAggregatorApplication extends Application {
-    void onStart(@Observes StartupEvent ev){
-       
-    }
+ 
 }
 

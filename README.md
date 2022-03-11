@@ -7,14 +7,10 @@ The aggregates are kept in state store and exposed via interactive queries.
 The goal of this note is to present how to run this store inventory aggregator locally 
 using Strimzi Kafka image, and how to build it.
 
-Updated 01/25/2021
+Updated 03/09/2022: 
 
-* move to quarkus 2.6.3
-> quarkus dev   does not work.
-
-Updated 01/26/2021: 
-
-* move to kafka 2.8.1. 
+* move to kafka 2.8.1 and Quarkus 2.7.3
+* Remove quarkus kafka stream api
 * Simplify readme and reference other content.
 
 ## Pre-requisites
@@ -23,7 +19,7 @@ For development purpose the following pre-requisites need to be installed on you
 
 **Java**
 - For the purposes of this lab we suggest Java 11+
-- Quarkus (on version 2.2.x)
+- Quarkus (on version 2.7.x)
 
 **Git client**
 
@@ -39,7 +35,7 @@ This project uses the Store Inventory Simulator to produce item sold events to k
 
 ## Run it with quarkus dev and compose.
 
-* Start local Kafka: `docker-compose  up -d` to start one Kafka broker, and two item-inventory service instances. 
+* Start local Kafka: `docker-compose  up -d` to start one Kafka broker, zookeeper, and the simulator. 
 * Created the `items` and `store.inventory` topics on your Kafka instance
  
  ```shell
@@ -69,8 +65,6 @@ f31e4364dec9   quay.io/ibmcase/eda-store-simulator        0.0.0.0:8082->8080/tcp
 * Start the app in dev mode: 
 
 ```sh
-./mvnw quarkus:dev
-# or with cli
 quarkus dev
 ```
 
@@ -136,7 +130,7 @@ Only the above function has business logic.
 
 ## Demonstration script
 
-For the up to date demonstration script see [Refarch-eda](https://ibm-cloud-architecture.github.io/refarch-eda/scenarios/realtime-inventory/#demonstration-script-for-the-solution).
+For the up to date demonstration script see [Refarch-eda](https://ibm-cloud-architecture.github.io/refarch-eda/scenarios/realtime-inventory).
 
 ### Quick validation for development purpose
 

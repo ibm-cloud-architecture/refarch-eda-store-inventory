@@ -3,7 +3,6 @@ package ibm.gse.eda.stores.domain;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.quarkus.kafka.client.serialization.JsonbSerde;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
 /**
@@ -11,8 +10,7 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
  * Store -> [<item_id,quantity>,....]
  */
 @RegisterForReflection
-public class StoreInventory {
-    public static JsonbSerde<StoreInventory> storeInventorySerde = new JsonbSerde<>(StoreInventory.class);
+public class StoreInventory  {
     
     public String storeName;
     // map <item_id,quantity>
