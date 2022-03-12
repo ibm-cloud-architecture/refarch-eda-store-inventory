@@ -17,9 +17,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-
-import groovyjarjarantlr4.v4.parse.ANTLRParser.qid_return;
-
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -27,7 +24,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 import ibm.gse.eda.stores.domain.ItemTransaction;
 import ibm.gse.eda.stores.domain.StoreInventory;
 import ibm.gse.eda.stores.domain.StoreInventoryAggregator;
-import ibm.gse.eda.stores.infra.events.JSONSerde;
 import ibm.gse.eda.stores.infra.events.StoreSerdes;
 import io.quarkus.test.junit.QuarkusTest;
 
@@ -50,7 +46,7 @@ public class TestItemStreamTopology {
     
     public  static Properties getStreamsConfig() {
         final Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "stock-aggregator");
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "store-aggregator");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "dummmy:1234");
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG,  Serdes.String().getClass());

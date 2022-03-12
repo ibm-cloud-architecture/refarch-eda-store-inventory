@@ -22,10 +22,10 @@ import io.quarkus.runtime.StartupEvent;
     },
     info = @Info(
         title="Store item inventory aggregators API",
-        version = "0.0.5",
+        version = "0.0.10",
         contact = @Contact(
-            name = "IBM Garage Solution Engineering",
-            url = "http://https://ibm-cloud-architecture.github.io/refarch-eda/"),
+            name = "IBM EDA team",
+            url = "http://https://ibm-cloud-architecture.github.io/refarch-eda-store-inventory/"),
         license = @License(
             name = "Apache 2.0",
             url = "http://www.apache.org/licenses/LICENSE-2.0.html"))
