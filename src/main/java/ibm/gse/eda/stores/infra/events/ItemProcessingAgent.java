@@ -31,7 +31,7 @@ public class ItemProcessingAgent {
    
     public KafkaStreams kafkaStreams;
     @Inject
-    KafkaStreamConfig kafkaStreamConfig;
+    KafkaConfig kafkaConfig;
     @Inject
     StoreInventoryAggregator aggregator;
 
@@ -70,7 +70,7 @@ public class ItemProcessingAgent {
       }
 
       private KafkaStreams initializeKafkaStreams() {
-        Properties props = kafkaStreamConfig.getStreamsProperties();
+        Properties props = kafkaConfig.getKafkaProperties();
         kafkaStreams = new KafkaStreams(aggregator.buildProcessFlow(), props);
        
         executorService.execute(new Runnable() {

@@ -13,8 +13,11 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import io.quarkus.runtime.annotations.ConfigItem;
 
+/**
+ * Keep Kafka Configuration loaded from properties or env. variable
+ */
 @Singleton
-public class KafkaStreamConfig {
+public class KafkaConfig {
 
     /**
      * Default Kafka bootstrap server.
@@ -47,11 +50,11 @@ public class KafkaStreamConfig {
     @ConfigItem
     public Optional<String> applicationServer;
     
-    public KafkaStreamConfig(){}
+    public KafkaConfig(){}
 
-    public Properties getStreamsProperties(){
-        Properties properties = KafkaStreamsPropertiesUtil.appKafkaStreamsProperties();
-        properties.putAll(KafkaStreamsPropertiesUtil.quarkusKafkaStreamsProperties());
+    public Properties getKafkaProperties(){
+        Properties properties = KafkaPropertiesUtil.appKafkaProperties();
+        properties.putAll(KafkaPropertiesUtil.quarkusKafkaProperties());
         properties.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         //properties.put(StreamsConfig.APPLICATION_ID_CONFIG,properties.get(key));
