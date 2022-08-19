@@ -5,7 +5,7 @@ store inventory view from items sold in different stores of a fictive retailer c
 The aggregates are kept in state store and exposed via interactive queries.
 
 The goal of this note is to present how to run this store inventory aggregator locally 
-using Strimzi Kafka image, and how to build it.
+using Event Streams Kafka image, and how to build it.
 
 Updated 03/09/2022: 
 
